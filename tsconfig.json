@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "outDir": "./build/",
+        "sourceMap": false,
+        "noImplicitAny": true,
+        "moduleResolution": "node",
+        "strictNullChecks": false,
+        "allowSyntheticDefaultImports": false,
+        "experimentalDecorators": true,
+        "jsx": "react",
+        "noUnusedParameters": false,
+        "noUnusedLocals": false,
+        "target": "es5",
+        "lib": [
+            "dom",
+            "es7"
+        ]
+    },
+    "include": [
+        "./client/**/*",
+        "**/*.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "./build",
+        "./assets",
+        "./server"
+    ]
+}
