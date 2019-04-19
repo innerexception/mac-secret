@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { onMatchStart, onUpdatePlayer } from './uiManager/Thunks'
 import AppStyles from '../AppStyles';
-import { TopBar, Button } from './Shared';
+import { TopBar, Button, LightButton } from './Shared';
 import { getTeamColor } from './Util'
 import { PlayerRune } from '../../enum'
 
@@ -12,10 +12,13 @@ interface Props {
 
 export default class Lobby extends React.Component<Props> {
 
+    state={
+        selectedAvatarIndex:0,
+        selectedTeamIndex:0
+    }
+
     startMatch = () => {
-        onMatchStart(
-            this.props.currentUser, 
-            this.props.activeSession)
+        onMatchStart(this.props.activeSession)
     }
 
     selectAvatar = (inc:number) => {
@@ -26,8 +29,18 @@ export default class Lobby extends React.Component<Props> {
 
     chooseAvatar = (avatar:string) => {
         let player = this.props.activeSession.players.find(player=>player.id === this.props.currentUser.id)
-        player.rune = avatar
-        onUpdatePlayer(player, this.props.activeSession)
+        onUpdatePlayer({...player, rune:avatar}, this.props.activeSession)
+    }
+
+    changeTeam = () => {
+        const index = (this.state.selectedTeamIndex+1)%this.props.activeSession.teams.length
+        let team = this.props.activeSession.teams[index]
+        this.setState({selectedTeamIndex: index})
+        onUpdatePlayer({...this.props.currentUser, teamId:team.id}, this.props.activeSession)
+    }
+
+    toggleLeader = (player:Player) => {
+        onMatchUpdate()
     }
 
     getErrors = () => {
@@ -46,15 +59,9 @@ export default class Lobby extends React.Component<Props> {
                     <div style={{marginBottom:'1em', alignItems:'center', overflow:'auto', maxHeight:'66vh'}}>
                         {this.props.activeSession.players.map((player:Player) => 
                             <div style={{...styles.nameTag, background: getTeamColor(player.teamId, this.props.activeSession.teams)}}>
-                                <select value={player.teamId} 
-                                        onChange={(e)=>onUpdatePlayer({...player, teamId: e.currentTarget.value}, this.props.activeSession)}>
-                                    {this.props.activeSession.teams.map(team=><option value={team.id}>{team.color}</option>)}
-                                </select>
-                                <div style={{display:'flex'}}>
-                                    <div style={{cursor:'pointer'}} onClick={()=>this.selectTeam(-1)}>{'<'}</div>
-                                    <div>{player.name}</div>
-                                    <div style={{cursor:'pointer'}} onClick={()=>this.selectTeam(1)}>></div>
-                                </div>
+                                <div>{player.name}</div>
+                                {LightButton(true, this.changeTeam, 'Change Team')}
+                                {LightButton(true, ()=>this.toggleLeader(player), 'Leader')}
                                 <div style={{display:'flex'}}>
                                     <div style={{cursor:'pointer'}} onClick={()=>this.selectAvatar(-1)}>{'<'}</div>
                                     <div style={{fontFamily:'Rune'}}>{player.rune}</div>

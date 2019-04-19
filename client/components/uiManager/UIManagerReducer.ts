@@ -1,4 +1,4 @@
-import { ReducerActions } from '../../../enum'
+import { ReducerActions, Teams } from '../../../enum'
 import {server} from './Thunks'
 
 const appReducer = (state = getInitialState(), action:any) => {
@@ -32,7 +32,8 @@ export default appReducer;
 const getInitialState = () => {
     return {
         activeSession: {
-            players: new Array<any>()
+            players: new Array<Player>(),
+            teams: Teams
         },
         isConnected: false,
         currentUser: {

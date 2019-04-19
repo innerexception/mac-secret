@@ -1,26 +1,11 @@
 @font-face {
-  font-family: 'Westington';
-  src: url('./assets/Westington.ttf')  format('truetype')
+  font-family: 'Athens';
+  src: url('./assets/AthensClassic.ttf')  format('truetype')
 }
 
 @font-face {
   font-family: 'Rune';
   src: url('./assets/V5_pixelpals.ttf')  format('truetype')
-}
-
-@font-face {
-  font-family: 'Gun';
-  src: url('./assets/FirearmEncyclopedia.ttf')  format('truetype')
-}
-
-@font-face {
-  font-family: 'Item';
-  src: url('./assets/Aywadings.ttf')  format('truetype')
-}
-
-@font-face {
-  font-family: 'Terrain';
-  src: url('./assets/Terrain.ttf')  format('truetype')
 }
 
 html {
@@ -29,7 +14,7 @@ html {
 }
 
 body {
-  font-family: 'Westington';
+  font-family: 'Athens';
   font-size: calc(10px + 1vw);
   line-height: unset
 }

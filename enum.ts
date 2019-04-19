@@ -1,3 +1,5 @@
+import AppStyles from "./client/AppStyles";
+
 export const ApiUrl= 'ws://localhost:1337'
 export const ReducerActions= {
     PLAYER_AVAILABLE: 'ma',
@@ -18,4 +20,32 @@ export const ReducerActions= {
     CONNECTED: 'c',
     SET_USER: 'su'
 }
+
+export const Teams = [
+    {
+        id: 'team1',
+        color: AppStyles.colors.grey1,
+        score: 0,
+        leadPlayerId: ''
+    },
+    {
+        id: 'team2',
+        color: AppStyles.colors.grey2,
+        score: 0,
+        leadPlayerId: ''
+    },
+    {
+        id: 'team3',
+        color: AppStyles.colors.grey3,
+        score: 0,
+        leadPlayerId: ''
+    },
+    {
+        id: 'team4',
+        color: AppStyles.colors.white,
+        score: 0,
+        leadPlayerId: ''
+    },
+]
+
 export const PlayerRune = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','K']

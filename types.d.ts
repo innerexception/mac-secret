@@ -8,10 +8,9 @@ interface Player {
 }
 
 interface Tile {
-    x: number
-    y: number
     word: string
     teamId: string
+    selected: boolean
 }
 
 interface Team {
@@ -19,6 +18,7 @@ interface Team {
     color: string
     score: number
     leadPlayerId: string
+    endTurnVoteIds: Array<string>
 }
 
 interface Session {
@@ -27,6 +27,8 @@ interface Session {
     words: Array<string>
     teams: Array<Team>
     sessionId: string
+    status: MatchStatus
+    activeTeamId: string
 }
 
 interface RState {
