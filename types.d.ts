@@ -35,6 +35,7 @@ interface Session {
     sessionId: string
     status: MatchStatus
     activeTeamId: string
+    clueText: string
 }
 
 interface RState {

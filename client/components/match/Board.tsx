@@ -1,8 +1,8 @@
 import * as React from 'react'
-import { onVoteTile, onUpdatePlayer, onEndTurn } from '../uiManager/Thunks'
+import { onVoteTile, onUpdatePlayer, onEndTurn, onUpdateClueText } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
-import { Button, LightButton } from '../Shared'
-import App from '../../App';
+import { Button } from '../Shared'
+import { TileState, MatchStatus } from '../../../enum'
 
 interface Props {
     activeSession: Session
@@ -27,7 +27,7 @@ export default class Board extends React.Component<Props, State> {
         let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === this.props.me.teamId)
         let readyTeamPlayers = teamPlayers.filter(player=>player.voteEndTurn)
         
-        if(readyTeamPlayers.length >= teamPlayers.length-1)
+        if(readyTeamPlayers.length >= teamPlayers.length-2)
             onEndTurn(this.props.activeSession)
         else
             onUpdatePlayer({...this.props.me, voteEndTurn: !this.props.me.voteEndTurn}, this.props.activeSession)
@@ -62,11 +62,8 @@ export default class Board extends React.Component<Props, State> {
     getTileBackground = (tile:Tile) => {
         let team = this.props.activeSession.teams.find(team=>team.id === tile.teamId)
         let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === this.props.me.teamId)
-        if(tile.state === TileState.CORRECT){
-            return AppStyles.colors.white
-        }
-        if(tile.state === TileState.WRONG){
-            return AppStyles.colors.black
+        if(tile.state !== TileState.ACTIVE){
+            return team.color
         }
         if(team.leadPlayerId === this.props.me.id){
             return team.color
@@ -75,6 +72,9 @@ export default class Board extends React.Component<Props, State> {
     }
 
     render(){
+        let activeTeam = this.props.activeSession.teams.find(team=>team.id === this.props.activeSession.activeTeamId)
+        let codeMaker = activeTeam.leadPlayerId === this.props.me.id
+        let myTeam = this.props.activeSession.teams.find(team=>team.id === this.props.me.teamId)
         return (
             <div>
                 <div style={{position:'relative'}}>
@@ -87,9 +87,10 @@ export default class Board extends React.Component<Props, State> {
                                         return <div style={{
                                                 ...styles.tile, 
                                                 background: this.getTileBackground(tile),
-                                                borderStyle: tile.votedIds[this.props.me.id] ? 'solid' : 'dotted'
+                                                borderStyle: tile.votedIds[this.props.me.id] ? 'solid' : 'dotted',
+                                                cursor: codeMaker ? 'none' : 'pointer'
                                             }} 
-                                            onClick={this.getTileClickHandler(tile)}>
+                                            onClick={!codeMaker && this.getTileClickHandler(tile)}>
                                             <div>{votes > 0 ? tile.word + ' - '+ votes : tile.word}</div>
                                         </div>
                                     })}
@@ -99,11 +100,20 @@ export default class Board extends React.Component<Props, State> {
                     </div>
                     {this.getNotification()}
                 </div>
-                <div style={{marginTop:'0.5em'}}>
-                    {Button(this.props.me.teamId===this.props.activeSession.activeTeamId, this.voteEndTurn, 'Check Secrets')}
-                </div>
+                {activeTeam.id === this.props.me.teamId ? 
+                    <div style={{marginTop:'0.5em'}}>
+                        <div>
+                            <input  type='text' 
+                                    disabled={!codeMaker} 
+                                    value={this.props.activeSession.clueText} 
+                                    onChange={(e)=>onUpdateClueText(e.currentTarget.value, this.props.activeSession)}/>
+                        </div>
+                        {codeMaker ? null : Button(!this.props.me.voteEndTurn, this.voteEndTurn, 'Confirm Secrets')}
+                    </div> : 
+                    <div style={{background:activeTeam.color}}>It's Another Team's Turn</div>
+                }
+                <div>Score: {myTeam.score}</div>
             </div>
-            
         )
     }
 }
@@ -133,9 +143,12 @@ const styles = {
         justifyContent:'space-between'
     },
     tile: {
-        width: '2em',
+        width: '6em',
         height:'2em',
         border: '1px',
-        position:'relative' as 'relative'
+        position:'relative' as 'relative',
+        display:'flex',
+        alignItems:'center',
+        justifyContent:'center'
     }
 }

@@ -16,7 +16,7 @@ export default class Match extends React.Component<Props> {
                 <div style={{padding:'0.5em', maxWidth:'25em'}}>
                     <Board 
                         board={this.props.activeSession.board} 
-                        me={this.props.currentUser}
+                        me={this.props.activeSession.players.find(player=>player.id===this.props.currentUser.id)}
                         activeSession={this.props.activeSession}
                         players={this.props.activeSession.players}/>
                 </div>

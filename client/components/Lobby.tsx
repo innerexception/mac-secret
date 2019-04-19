@@ -18,6 +18,7 @@ export default class Lobby extends React.Component<Props> {
     }
 
     startMatch = () => {
+        console.log(this.props.activeSession)
         onMatchStart(this.props.activeSession)
     }
 
@@ -47,17 +48,19 @@ export default class Lobby extends React.Component<Props> {
     }
 
     getErrors = () => {
-        if(this.props.activeSession.players.length < 4) return 'Waiting for more to join...'
-        if(this.props.activeSession.players.length > 12) return 'Too many players in match...'
-        if(this.props.activeSession.teams.find(team=>{
+        let error, activeTeams=0
+        if(this.props.activeSession.players.length < 4) error= 'Waiting for more to join...'
+        if(this.props.activeSession.players.length > 12) error= 'Too many players in match...'
+        this.props.activeSession.teams.forEach(team=>{
             let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === team.id)
-            if(teamPlayers.length > 0)
-                return teamPlayers.length < 2
-            return false
-        })) 
-            return 'All teams need at least 2 players...'
-        if(this.props.activeSession.teams.filter(team=>!!team.leadPlayerId).length === this.props.activeSession.teams.length) return 'Each team needs one leader...'
-        if(this.props.activeSession.teams.length < 2) return 'There must be at least 2 teams...'
+            if(teamPlayers.length > 0){
+                activeTeams++
+                if(teamPlayers.length < 2) error='All teams need at least 2 players...'
+                if(!team.leadPlayerId) error='Each team needs a leader...'
+            }
+        })
+        if(activeTeams < 2) error='There must be at least 2 teams...'
+        return error
     }
 
     render(){
@@ -90,7 +93,7 @@ export default class Lobby extends React.Component<Props> {
                         )}
                     </div>
                     <div>{this.getErrors()}</div>
-                    {Button(!!this.getErrors(), this.startMatch, 'Start')}
+                    {Button(typeof(this.getErrors())==='undefined', this.startMatch, 'Start')}
                 </div>
             </div>
             

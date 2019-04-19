@@ -1,5 +1,5 @@
 import { dispatch } from '../../../client/App'
-import { ReducerActions, Teams } from '../../../enum'
+import { ReducerActions, Teams, TileState, MatchStatus } from '../../../enum'
 import WS from '../../WebsocketClient'
 export const server = new WS()
 import { getRandomWord, shuffleArray } from '../Util'
@@ -10,11 +10,12 @@ export const onLogin = (currentUser:Player, sessionId:string) => {
 }
 
 export const onMatchStart = (session:Session) => {
+    let activeTeams = session.teams.filter(team=>session.players.filter(player=>player.teamId===team.id).length>0)
     let board = new Array(5).fill(null).map((row, i)=>new Array(5).fill(null).map((tile,j)=>{
         return {
             id: Date.now() + '' + Math.random(),
             word: getRandomWord(),
-            teamId: Teams[Teams.length%(i+j)].id,
+            teamId: activeTeams[(i+j)%activeTeams.length].id,
             votedIds: {},
             state: TileState.ACTIVE
         }
@@ -22,6 +23,8 @@ export const onMatchStart = (session:Session) => {
     board = shuffleArray(board)
     const newSession = {
         ...session,
+        teams: activeTeams,
+        activeTeamId: activeTeams[0].id,
         status: MatchStatus.ACTIVE,
         board
     }
@@ -29,10 +32,9 @@ export const onMatchStart = (session:Session) => {
 }
 
 export const onEndTurn = (session:Session) => {
-
     let teamPlayers = session.players.filter(player=>player.teamId === session.activeTeamId)
     session.board.forEach(row=>row.forEach(tile=>{
-        if(Object.keys(tile.votedIds).length === teamPlayers.length){
+        if(Object.keys(tile.votedIds).length === teamPlayers.length-1){
             let tileTeam = session.teams.find(team=>team.id===tile.teamId)
             tileTeam.score++
             if(tile.teamId===session.activeTeamId)
@@ -48,6 +50,7 @@ export const onEndTurn = (session:Session) => {
         if(team.id === session.activeTeamId) activeTeamIndex = i
     })
     session.activeTeamId = session.teams[(activeTeamIndex+1)%session.teams.length].id
+    session.clueText = ''
 
     sendSessionUpdate(session)
 }
@@ -75,6 +78,11 @@ export const onUpdatePlayer = (player:Player, session:Session) => {
 export const onTeamUpdate = (team:Team, session:Session) => {
     session.teams = session.teams.filter(steam=>steam.id!==team.id)
     session.teams.push(team)
+    sendSessionUpdate(session)
+}
+
+export const onUpdateClueText = (text:string, session:Session) => {
+    session.clueText = text
     sendSessionUpdate(session)
 }
 

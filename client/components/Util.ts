@@ -1,4 +1,4 @@
-import Words from '../assets/Words.json'
+var Words = require('../assets/Words.json')
 
 export const getRandomInt = (max:number) => Math.floor(Math.random() * Math.floor(max))
 
@@ -16,5 +16,5 @@ export const shuffleArray = (array:Array<any>) => {
   }
 
   export const getRandomWord = () => {
-        return Words[getRandomInt(Words.length)]
+        return Words.words[getRandomInt(Words.words.length)]
   }
