@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { onVoteEndTurn } from '../uiManager/Thunks'
+import { onVoteTile, onUpdatePlayer, onEndTurn } from '../uiManager/Thunks'
 import AppStyles from '../../AppStyles';
 import { Button, LightButton } from '../Shared'
+import App from '../../App';
 
 interface Props {
     activeSession: Session
@@ -20,6 +21,16 @@ export default class Board extends React.Component<Props, State> {
     state = {
         highlightTiles: [[false]],
         showMessage: ''
+    }
+
+    voteEndTurn = () => {
+        let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === this.props.me.teamId)
+        let readyTeamPlayers = teamPlayers.filter(player=>player.voteEndTurn)
+        
+        if(readyTeamPlayers.length >= teamPlayers.length-1)
+            onEndTurn(this.props.activeSession)
+        else
+            onUpdatePlayer({...this.props.me, voteEndTurn: !this.props.me.voteEndTurn}, this.props.activeSession)
     }
 
     getNotification = () => {
@@ -44,8 +55,23 @@ export default class Board extends React.Component<Props, State> {
     }
 
     getTileClickHandler = (tile:Tile) => {
-        //TODO If it is my turn, return tile vote handler
-        //else return null
+        if(this.props.activeSession.activeTeamId === this.props.me.teamId)
+            return ()=>onVoteTile(tile, this.props.me.id, this.props.activeSession)
+    }
+
+    getTileBackground = (tile:Tile) => {
+        let team = this.props.activeSession.teams.find(team=>team.id === tile.teamId)
+        let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === this.props.me.teamId)
+        if(tile.state === TileState.CORRECT){
+            return AppStyles.colors.white
+        }
+        if(tile.state === TileState.WRONG){
+            return AppStyles.colors.black
+        }
+        if(team.leadPlayerId === this.props.me.id){
+            return team.color
+        }
+        return Object.keys(tile.votedIds).length === teamPlayers.length ? AppStyles.colors.grey1 : 'transparent'
     }
 
     render(){
@@ -56,16 +82,17 @@ export default class Board extends React.Component<Props, State> {
                         <div style={{display:'flex'}}>
                             {this.props.board.map((row, x) => 
                                 <div>
-                                    {row.map((tile:Tile, y) => 
-                                        <div style={{
+                                    {row.map((tile:Tile, y) => {
+                                        const votes = Object.keys(tile.votedIds).length
+                                        return <div style={{
                                                 ...styles.tile, 
-                                                background: this.state.highlightTiles[x] && this.state.highlightTiles[x][y]===true ? AppStyles.colors.grey2 : 'transparent',
-                                                borderStyle: isSelectedTile(tile, this.state.selectedTile) ? 'dashed' : 'dotted'
+                                                background: this.getTileBackground(tile),
+                                                borderStyle: tile.votedIds[this.props.me.id] ? 'solid' : 'dotted'
                                             }} 
                                             onClick={this.getTileClickHandler(tile)}>
-                                            {tile.word}
+                                            <div>{votes > 0 ? tile.word + ' - '+ votes : tile.word}</div>
                                         </div>
-                                    )}
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -73,19 +100,12 @@ export default class Board extends React.Component<Props, State> {
                     {this.getNotification()}
                 </div>
                 <div style={{marginTop:'0.5em'}}>
-                    {Button(this.props.me.teamId===this.props.activeSession.activeTeamId, ()=>onVoteEndTurn(this.props.me, this.props.activeSession), 'Check Secrets')}
+                    {Button(this.props.me.teamId===this.props.activeSession.activeTeamId, this.voteEndTurn, 'Check Secrets')}
                 </div>
             </div>
             
         )
     }
-}
-
-const isSelectedTile = (tile:Tile, selectedTile?:Tile) => {
-    if(selectedTile){
-        return tile.x === selectedTile.x && tile.y === selectedTile.y
-    }
-    return false
 }
 
 const styles = {

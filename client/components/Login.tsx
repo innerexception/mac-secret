@@ -27,7 +27,8 @@ const getUser = (name:string) => {
        name,
        id: Date.now() + ''+ Math.random(),
        teamId: 'team1',
-       rune: 'a'
+       rune: 'a',
+       voteEndTurn: false
     }
 }
 

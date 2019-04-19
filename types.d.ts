@@ -1,16 +1,23 @@
 declare enum MatchStatus {ACTIVE='ACTIVE',WIN='WIN',LOSE='LOSE', SETUP='SETUP'}
-
+declare enum TileState {ACTIVE='ACTIVE', CORRECT='CORRECT', WRONG='WRONG'}
+declare module "*.json" {
+    const words: Array<string>
+    export default words
+}
 interface Player {
     name:string
     id:string
     rune:string
     teamId: string
+    voteEndTurn: boolean
 }
 
 interface Tile {
+    id: string
     word: string
     teamId: string
-    selected: boolean
+    votedIds: any
+    state: TileState
 }
 
 interface Team {
@@ -18,7 +25,6 @@ interface Team {
     color: string
     score: number
     leadPlayerId: string
-    endTurnVoteIds: Array<string>
 }
 
 interface Session {

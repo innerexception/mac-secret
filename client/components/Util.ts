@@ -1,3 +1,5 @@
+import Words from '../assets/Words.json'
+
 export const getRandomInt = (max:number) => Math.floor(Math.random() * Math.floor(max))
 
 export const getTeamColor = (teamId: string, teams:Array<Team>) => {
@@ -11,4 +13,8 @@ export const shuffleArray = (array:Array<any>) => {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return Array.from(array)
+  }
+
+  export const getRandomWord = () => {
+        return Words[getRandomInt(Words.length)]
   }
