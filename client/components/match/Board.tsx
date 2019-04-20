@@ -3,6 +3,7 @@ import { onVoteTile, onUpdatePlayer, onEndTurn, onUpdateClueText } from '../uiMa
 import AppStyles from '../../AppStyles';
 import { Button, LightButton } from '../Shared'
 import { TileState, MatchStatus } from '../../../enum'
+import App from '../../App';
 
 interface Props {
     activeSession: Session
@@ -39,11 +40,18 @@ export default class Board extends React.Component<Props, State> {
     }
 
     getNotification = () => {
-        let activeName = this.props.activeSession.players[0] && this.props.activeSession.players[0].name
+        let activeTeam = this.props.activeSession.teams.find(team=>team.id===this.props.activeSession.activeTeamId)
+        let activeName = this.props.activeSession.players.find(player=>player.id === activeTeam.leadPlayerId)
         if(this.props.activeSession.status === MatchStatus.WIN)
             return <div style={{...styles.disabled, display: 'flex'}}>
                         <div style={AppStyles.notification}>
-                            {activeName} is Victorious
+                            {activeName.name}'s team wins!
+                        </div>
+                    </div>
+        else if(this.props.activeSession.status === MatchStatus.LOSE)
+            return <div style={{...styles.disabled, display: 'flex'}}>
+                        <div style={AppStyles.notification}>
+                            {activeName.name}'s team loses!
                         </div>
                     </div>
         else if(this.state.showMessage)
@@ -60,20 +68,24 @@ export default class Board extends React.Component<Props, State> {
     }
 
     getTileClickHandler = (tile:Tile) => {
-        if(this.props.activeSession.activeTeamId === this.props.me.teamId && tile.state === TileState.ACTIVE)
+        if(this.props.activeSession.activeTeamId === this.props.me.teamId && tile.state === TileState.ACTIVE || tile.state === TileState.ASSASSIN || tile.state === TileState.NEUTRAL)
             return ()=>onVoteTile(tile, this.props.me.id, this.props.activeSession)
     }
 
-    getTileBackground = (tile:Tile) => {
-        let team = this.props.activeSession.teams.find(team=>team.id === tile.teamId)
-        let teamPlayers = this.props.activeSession.players.filter(player=>player.teamId === this.props.me.teamId)
-        if(tile.state !== TileState.ACTIVE){
-            return team.color
+    getTileBackground = (tile:Tile, isTeamLead: boolean) => {
+        let tileTeam = this.props.activeSession.teams.find(team=>team.id === tile.teamId)
+        if(tile.state === TileState.CORRECT || tile.state === TileState.WRONG){
+            return tileTeam.color
         }
-        if(team.leadPlayerId === this.props.me.id){
-            return team.color
+        if(isTeamLead){
+            if(tile.state===TileState.ASSASSIN){
+                return AppStyles.colors.black
+            }
+            if(tile.state===TileState.NEUTRAL){
+                return AppStyles.colors.white
+            }
+            return tileTeam.color
         }
-        return Object.keys(tile.votedIds).length === teamPlayers.length ? AppStyles.colors.grey1 : 'transparent'
     }
 
     render(){
@@ -85,6 +97,7 @@ export default class Board extends React.Component<Props, State> {
                 <div style={{...styles.tileInfo, background:myTeam.color}}>
                     <div style={styles.infoInner}>
                         <div style={{display:'flex', alignItems:'center', justifyContent:'center'}}>
+                            <div>{this.props.me.name}</div>
                             <div style={{fontFamily:'Rune'}}>{this.props.me.rune}</div>
                             <div>Score: {myTeam.score}</div>
                         </div>
@@ -98,7 +111,7 @@ export default class Board extends React.Component<Props, State> {
                                             placeholder="Noun - 3"
                                             value={this.props.activeSession.clueText} 
                                             onChange={(e)=>onUpdateClueText(e.currentTarget.value, this.props.activeSession)}/>
-                                    {LightButton(true, ()=>this.setState({showMessage: codeMaker ? 'Enter a word and a number to try to tell your team to pick the correct words. The number is the amount of words they should pick.':'Your leader is trying to get you to pick the correct cards using this clue. The number is the amount of words you should pick.'}), '?')}
+                                    {LightButton(true, ()=>this.setState({showMessage: codeMaker ? 'Enter a word and a number to try to tell your team to pick the correct words. The number is the amount of words they should pick, and the correct words have your team color. The black tile is the bomb.':'Your leader is trying to get you to pick the correct words using this clue. The number is the amount of words you should pick.'}), '?')}
                                 </div>
                                 {codeMaker ? null : Button(!this.props.me.voteEndTurn, this.voteEndTurn, 'Confirm Secrets')}
                             </div> : 
@@ -109,15 +122,16 @@ export default class Board extends React.Component<Props, State> {
                 <div style={{position:'relative'}}>
                     <div style={styles.mapFrame}>
                         <div style={{display:'flex'}}>
-                            {this.props.board.map((row, x) => 
+                            {this.props.board.map((row) => 
                                 <div>
-                                    {row.map((tile:Tile, y) => {
+                                    {row.map((tile:Tile) => {
                                         const votes = Object.keys(tile.votedIds).length
                                         return <div style={{
                                                 ...styles.tile, 
-                                                background: this.getTileBackground(tile),
+                                                background: this.getTileBackground(tile, codeMaker),
                                                 borderStyle: tile.votedIds[this.props.me.id] ? 'solid' : 'dotted',
-                                                cursor: codeMaker ? 'none' : 'pointer'
+                                                cursor: codeMaker ? 'none' : 'pointer',
+                                                opacity: tile.state === TileState.CORRECT || tile.state === TileState.WRONG ? 0.5 : 1
                                             }} 
                                             onClick={!codeMaker && this.getTileClickHandler(tile)}>
                                             <div style={styles.tileInner}>{votes > 0 ? tile.word + ' - '+ votes : tile.word}</div>

@@ -9,7 +9,7 @@ module.exports = {
         filename: 'bundle.js',
         publicPath: './',
     },
-    devtool: 'eval-source-map',
+    devtool: false,
     resolve: {extensions: ['.js', '.jsx', '.ts', '.tsx']},
     plugins: [
         new webpack.WatchIgnorePlugin([

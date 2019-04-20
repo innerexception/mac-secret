@@ -1,5 +1,5 @@
 declare enum MatchStatus {ACTIVE='ACTIVE',WIN='WIN',LOSE='LOSE', SETUP='SETUP'}
-declare enum TileState {ACTIVE='ACTIVE', CORRECT='CORRECT', WRONG='WRONG'}
+declare enum TileState {ACTIVE='ACTIVE', CORRECT='CORRECT', WRONG='WRONG', ASSASSIN='ASSASSIN', NEUTRAL='NEUTRAL'}
 declare module "*.json" {
     const words: Array<string>
     export default words

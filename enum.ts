@@ -1,7 +1,8 @@
 import AppStyles from "./client/AppStyles";
 export enum MatchStatus {ACTIVE='ACTIVE',WIN='WIN',LOSE='LOSE', SETUP='SETUP'}
-export enum TileState {ACTIVE='ACTIVE', CORRECT='CORRECT', WRONG='WRONG'}
-export const ApiUrl= 'ws://localhost:1337'
+export enum TileState {ACTIVE='ACTIVE', CORRECT='CORRECT', WRONG='WRONG', ASSASSIN='ASSASSIN', NEUTRAL='NEUTRAL'}
+// export const ApiUrl= 'ws://localhost:1337'
+export const ApiUrl= 'wss://services.cryptonomical.com:3333'
 export const ReducerActions= {
     PLAYER_AVAILABLE: 'ma',
     MATCH_UPDATE: 'mu',
