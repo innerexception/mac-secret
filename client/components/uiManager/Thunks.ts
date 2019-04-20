@@ -32,6 +32,7 @@ export const onMatchStart = (session:Session) => {
 }
 
 export const onEndTurn = (session:Session) => {
+    let votedTiles = new Array<Tile>()
     let teamPlayers = session.players.filter(player=>player.teamId === session.activeTeamId)
     session.board.forEach(row=>row.forEach(tile=>{
         if(Object.keys(tile.votedIds).length === teamPlayers.length-1){
@@ -41,9 +42,14 @@ export const onEndTurn = (session:Session) => {
                 tile.state = TileState.CORRECT
             else 
                 tile.state = TileState.WRONG
+            votedTiles.push(tile)
         }
         tile.votedIds = {}
     }))
+
+    session.globalMessage = 'The active team just put in their votes, and the results are in: \n'+
+        votedTiles.map(tile=>tile.word + ' was '+(tile.state === TileState.CORRECT ? ' CORRECT! (+1) ' : ' WRONG! (Other team +1) '))
+        .join('\n')
 
     let activeTeamIndex=0
     session.teams.forEach((team,i)=>{

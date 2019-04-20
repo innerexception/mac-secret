@@ -38,8 +38,6 @@ export default {
         border: '3px solid',
         borderRadius: '5px',
         background:'white',
-        width:'50%',
-        marginLeft:'50%',
         padding:'2px'
     },
     buttonInner: {

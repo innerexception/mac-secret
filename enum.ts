@@ -25,13 +25,13 @@ export const ReducerActions= {
 export const Teams = [
     {
         id: 'team1',
-        color: AppStyles.colors.grey1,
+        color: 'url('+require('./client/assets/grayTile.png')+')',
         score: 0,
         leadPlayerId: ''
     },
     {
         id: 'team2',
-        color: AppStyles.colors.grey2,
+        color: 'url('+require('./client/assets/whiteTile3.png')+')',
         score: 0,
         leadPlayerId: ''
     },

@@ -36,6 +36,7 @@ interface Session {
     status: MatchStatus
     activeTeamId: string
     clueText: string
+    globalMessage: string
 }
 
 interface RState {
